@@ -1,6 +1,7 @@
-export default function Home() {
-  return (
-    <><div>pokemon list</div>
-    </>
-  );
+import Main from 'pages/user/index'
+
+const Index = () => {
+  return <><Main/></>
 }
+
+export default Index
