@@ -1,18 +1,20 @@
 import {useEffect, useRef, useState} from 'react'
 import API from 'service/api'
 import {PokemonInfoTypesModel, PokemonListModel} from 'model/pokemonmodel'
+import { useRouter } from 'next/router';
 
 const UserMain = () => {
+    const router = useRouter();
     const [pageNumber, setPageNumber] = useState<number>(1)
     const [pokemonList, setPokemonList] = useState<Array<PokemonListModel>>([])
 
-    const setPokemonLists = () => {
+    const setPokemonLists = async () => {
         let page = (pageNumber-1)*10
         for(let i=1; i<11; i++){
             getPokemonListAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${page+i}`) 
-            getPokemonListAPI.current.call()
+            await getPokemonListAPI.current.call()
         }
-        console.log(pokemonList)
+        // console.log(pokemonList)
     }
 
     // pokemon list
@@ -44,7 +46,7 @@ const UserMain = () => {
     }
 
     const onClickPokemonDetail = (value: PokemonListModel) => {
-        console.log(value)
+        router.push(`/detail/pokemon?id=${value.id}`)
     }
 
     useEffect(() => {
@@ -87,13 +89,14 @@ const UserMain = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {pokemonList.map((value, index) => {
-                            if(index>9) return <></>
+                        {pokemonList.filter((value, index, self) => 
+                            index === self.findIndex((e) => e.name === value.name)
+                        ).map((value, index) => {
                             return (
                                 <>
                                     <tr 
                                         key={`pokemon_${(index+1)}`}
-                                        style={{textAlign: "center"}}
+                                        style={{textAlign: "center", cursor: "pointer"}}
                                         onClick={() => {onClickPokemonDetail(value)}}
                                     >
                                         <td>{value.id}</td>

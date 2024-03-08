@@ -26,3 +26,21 @@ export interface PokemonInfoTypestypeModel {
     name: string,
     url: string,
 }
+
+export interface PokemonDetailInfoModel {
+    name: string,
+    img: string,
+    types: Array<PokemonInfoTypesModel>
+    stats: Array<PokemonInfoStatsModel>
+}
+
+export interface PokemonInfoStatsModel {
+    base_stat: number
+    effort: number
+    stat: PokemonInfoStatsStatModel
+}
+
+export interface PokemonInfoStatsStatModel {
+    name: string,
+    url: string,
+}
