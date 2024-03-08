@@ -44,3 +44,15 @@ export interface PokemonInfoStatsStatModel {
     name: string,
     url: string,
 }
+
+export interface PaginationProps {
+    onChangePage: (page: number) => void
+    page: number
+}
+
+export interface PokemonFilterListModel {
+    count: number,
+    next: string | null,
+    previous: string | null,
+    results: Array<PokemonInfoStatsStatModel>
+}

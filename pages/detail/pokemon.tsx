@@ -1,4 +1,4 @@
-import { PokemonDetailInfoModel, PokemonInfoStatsModel, PokemonInfoTypesModel } from "model/pokemonmodel";
+import { PaginationProps, PokemonDetailInfoModel, PokemonInfoStatsModel, PokemonInfoTypesModel } from "model/pokemonmodel";
 import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react";
 import API from "service/api";
@@ -15,7 +15,7 @@ const PokemonDetail = () => {
 
     const getPokemonDetailAPI = useRef(
         new API(`https://pokeapi.co/api/v2/pokemon/1`, 'GET', {
-            success: async (res) => {
+            success: (res) => {
                 setPokemonDetail({
                     ...pokemonDetail,
                     name: res.name,
@@ -32,7 +32,7 @@ const PokemonDetail = () => {
 
     const getPokemonEvolutionAPI = useRef(
         new API(`https://pokeapi.co/api/v2/evolution-chain/1/`, 'GET', {
-            success: async (res) => {
+            success: (res) => {
                 console.log('res', res)
             },
             error: (err) => {
