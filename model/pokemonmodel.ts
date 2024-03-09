@@ -56,3 +56,30 @@ export interface PokemonFilterListModel {
     previous: string | null,
     results: Array<PokemonInfoStatsStatModel>
 }
+
+export interface PokemonEvolutionChainModel {
+    evolution_chain: {
+        url: string
+    }
+}
+
+// export interface PokemonSearchDetailInfoModel {
+//     evolves_to: Array<PokemonSearchDetailEvolvesToInfoModel>,
+//     species: {
+//         name: string,
+//     }
+// }
+
+// export interface PokemonSearchDetailEvolvesToInfoModel {
+//     evolves_to: Array<PokemonSearchDetailEvolvesToEvolvesToInfoModel>,
+//     species: {
+//         name: string,
+//     }
+// }
+
+// export interface PokemonSearchDetailEvolvesToEvolvesToInfoModel {
+//     evolves_to: Array<>,
+//     species: {
+//         name: string,
+//     }
+// }

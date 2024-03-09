@@ -13,6 +13,8 @@ const UserMain = () => {
     const [pokemonGenerationList, setPokemonGenerationList] = useState<Array<PokemonInfoStatsStatModel>>([])
     const [currentFilterType, setCurrentFilterType] = useState<string>('')
     const [currentFilterGen, setCurrentFilterGen] = useState<string>('')
+    const [currentSearchTarget, setCurrentSearchTarget] = useState<string>('')
+    const [searchList, setSearchList] = useState<string>('')
 
     //[API] pokemon list
     const getPokemonTotalListAPI = useRef(
@@ -75,16 +77,65 @@ const UserMain = () => {
                 // console.log(err)
             },
         })
-    )  
+    )
+
+    //[API] pokemon search info
+    const getPokemonSearchInfoAPI = useRef(
+        new API(`https://pokeapi.co/api/v2/pokemon/pikachu`, 'GET', {
+            success: (res) => {
+                let url = res.evolution_chain.url
+                getPokemonEvolutionChainAPI.current.setUrl(url)
+                getPokemonEvolutionChainAPI.current.call()
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    )    
+
+    //[API] pokemon evolution-chain
+    const getPokemonEvolutionChainAPI = useRef(
+        new API(``, 'GET', {
+            success: (res) => {
+                let arr = [] 
+                arr.push(res.chain.species.name ?? '')
+                if(res.chain.evolves_to && res.chain.evolves_to.length > 0) {
+                    for(let i=0; i<res.chain.evolves_to.length; i++){
+                        arr.push(res.chain.evolves_to[i].species.name ?? '')
+                        if(res.chain.evolves_to[i].evolves_to && res.chain.evolves_to[i].evolves_to.length > 0) {
+                            for(let j=0; j<res.chain.evolves_to[i].evolves_to.length; j++){
+                                arr.push(res.chain.evolves_to[i].evolves_to[j].species.name ?? '')
+                            }
+                        }
+                    }
+                }
+                setSearchList(arr.join(', '))
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    )      
 
     const setPokemonLists = async (count: number) => {
         for(let i=1; i<count; i++){
+            if(i > 151) return
             getPokemonInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${i}`) 
             await getPokemonInfoAPI.current.call()
         }
     }    
     
+    // search button onClick
     const onClickSearchPokemon = () => {
+        setSearchList('')
+        if(!currentSearchTarget || currentSearchTarget === '') {
+            if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
+            else return
+        }else {
+            getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${currentSearchTarget.toLocaleLowerCase()}`)
+            // getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/generation`)
+            getPokemonSearchInfoAPI.current.call()
+        }
     }
 
     const onClickPokemonDetail = (value: PokemonListModel) => {
@@ -103,7 +154,11 @@ const UserMain = () => {
     // filter generation change
     const onChangeGenrationName = (e: string) => {
         setCurrentFilterGen(e)
-    }    
+    }
+
+    const onChangeSearchPokemon = (e: string) => {
+        setCurrentSearchTarget(e)
+    }
 
     useEffect(() => {
         getPokemonTotalListAPI.current.call()
@@ -123,10 +178,13 @@ const UserMain = () => {
                     style={{listStyle: 'none', display: 'flex'}}
                 >
                     <li>
-                        <input className='searchInput'></input>
-                    </li>        
-                    <li>
-                        <button className='searchButton' onClick={onClickSearchPokemon}>Search</button>
+                        <input 
+                            className='searchInput'
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                onChangeSearchPokemon(e.currentTarget.value)
+                            }}
+                        />
+                        <button className='searchButton' onClick={() => {onClickSearchPokemon()}}>Search</button>
                     </li>
                     <li style={{marginLeft: '20px'}}>
                         <select 
@@ -191,7 +249,10 @@ const UserMain = () => {
                         }).filter(e => {
                             if(currentFilterGen === 'total') return e.gen.indexOf('') >= 0
                             else return e.gen.toLowerCase().indexOf(currentFilterGen) >= 0
-                        }).map((value, index) => {
+                        }).filter((e => {
+                            if(searchList === '') return searchList.indexOf('') >= 0
+                            else return searchList.indexOf(e.name) >= 0
+                        })).map((value, index) => {
                             if((pageNumber*10) < value.id) return <></>
                             return (
                                 <>
