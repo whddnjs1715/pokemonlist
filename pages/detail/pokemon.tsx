@@ -6,6 +6,11 @@ import API from "service/api";
 const PokemonDetail = () => {
     const router = useRouter();
     const { id } = router.query;
+    // if(id && !Array.isArray(id)) {
+    //     console.log(parseInt(id))
+    //     // console.log(parseInt(id) === NaN)
+    //     console.log(isNaN(parseInt(id)))
+    // }
     const [pokemonDetail, setPokemonDetail] = useState<PokemonDetailInfoModel>({
         name: '',
         img: '',
@@ -43,11 +48,16 @@ const PokemonDetail = () => {
     
     useEffect(() => {
         if(!id) return
-        getPokemonDetailAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${id}`)
+        if(Array.isArray(id)) return
+        router.push(`http://localhost:3000/detail/pokemon?id=${parseInt(id)}`)
+        getPokemonDetailAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${parseInt(id)}`)
         getPokemonDetailAPI.current.call()
         // getPokemonEvolutionAPI.current.setUrl(`https://pokeapi.co/api/v2/evolution-chain/${id}`)
         // getPokemonEvolutionAPI.current.call()
     }, [id])
+
+    if(id && Array.isArray(id)) return (<><h1>No Page</h1></>)
+    if(id && !Array.isArray(id) && isNaN(parseInt(id))) return (<><h1>No Page</h1></>)
 
     return (
         <>

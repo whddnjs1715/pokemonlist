@@ -62,7 +62,14 @@ const UserMain = () => {
                     else types += value.type.name
                 })
                 let generation = 'Generation-i'
-                if(res.id > 151) generation = 'Generation-ii'
+                if(res.id > 151 && res.id <252) generation = 'Generation-ii'
+                else if(res.id > 251 && res.id < 387) generation = 'Generation-iii'
+                else if(res.id > 386 && res.id < 495) generation = 'Generation-iv'
+                else if(res.id > 494 && res.id < 650) generation = 'Generation-v'
+                else if(res.id > 649 && res.id < 722) generation = 'Generation-vi'
+                else if(res.id > 721 && res.id < 810) generation = 'Generation-vii'
+                else if(res.id > 809 && res.id < 906) generation = 'Generation-viii'
+                else if(res.id > 905) generation = 'Generation-ix'
                 setPokemonList(prevItems => [
                     ...prevItems,
                     {
@@ -119,11 +126,23 @@ const UserMain = () => {
 
     const setPokemonLists = async (count: number) => {
         for(let i=1; i<count; i++){
-            if(i > 151) return
+            if(i > 1025) return
             getPokemonInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${i}`) 
             await getPokemonInfoAPI.current.call()
         }
-    }    
+    }
+    
+    //[API] pokemon search info
+    const tmpAPI = useRef(
+        new API(`https://pokeapi.co/api/v2/pokemon/pikachu`, 'GET', {
+            success: (res) => {
+                console.log(res)
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    )      
     
     // search button onClick
     const onClickSearchPokemon = () => {
@@ -133,7 +152,6 @@ const UserMain = () => {
             else return
         }else {
             getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${currentSearchTarget.toLocaleLowerCase()}`)
-            // getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/generation`)
             getPokemonSearchInfoAPI.current.call()
         }
     }
@@ -164,6 +182,8 @@ const UserMain = () => {
         getPokemonTotalListAPI.current.call()
         getPokemonTypeAPI.current.call()
         getPokemonGenerationAPI.current.call()
+        tmpAPI.current.setUrl(`https://pokeapi.co/api/v2/generation/9`)
+        tmpAPI.current.call()
     }, [])
 
     useEffect(() => {
