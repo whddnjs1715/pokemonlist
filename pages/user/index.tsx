@@ -1,19 +1,23 @@
 import {useEffect, useRef, useState} from 'react'
 import API from 'service/api'
-import {PokemonInfoStatsStatModel, PokemonInfoTypesModel, PokemonListModel, PokemonFilterListModel} from 'model/pokemonmodel'
+import {PokemonInfoStatsStatModel, PokemonInfoTypesModel, PokemonListModel, PokemonFilterListModel, PokemonSessionStorageDataModel} from 'model/pokemonmodel'
 import { useRouter } from 'next/router';
 import Pagination from 'components/common/pagination'
 
 const UserMain = () => {
     const router = useRouter();
-    const [pageNumber, setPageNumber] = useState<number>(1)
     const [pokemonTotalListCount, setPokemonTotalListCount] = useState<number | undefined>(undefined)
     const [pokemonList, setPokemonList] = useState<Array<PokemonListModel>>([])
     const [pokemonTypeList, setPokemonTypeList] = useState<Array<PokemonInfoStatsStatModel>>([])
     const [pokemonGenerationList, setPokemonGenerationList] = useState<Array<PokemonInfoStatsStatModel>>([])
-    const [currentFilterType, setCurrentFilterType] = useState<string>('')
-    const [currentFilterGen, setCurrentFilterGen] = useState<string>('')
     const [currentSearchTarget, setCurrentSearchTarget] = useState<string>('')
+    const [currentSearchResult, setCurrentSearchResult] = useState<string>('')
+    const [storedSearchData, setStoredSearchData] = useState<PokemonSessionStorageDataModel>({
+        page: 1,
+        type: '',
+        generation: '',
+        search: '',
+    })
     const [searchList, setSearchList] = useState<string>('')
 
     //[API] pokemon list
@@ -62,7 +66,7 @@ const UserMain = () => {
                     else types += value.type.name
                 })
                 let generation = 'Generation-i'
-                if(res.id > 151 && res.id <252) generation = 'Generation-ii'
+                if(res.id > 3 && res.id <252) generation = 'Generation-ii'
                 else if(res.id > 251 && res.id < 387) generation = 'Generation-iii'
                 else if(res.id > 386 && res.id < 495) generation = 'Generation-iv'
                 else if(res.id > 494 && res.id < 650) generation = 'Generation-v'
@@ -81,20 +85,21 @@ const UserMain = () => {
                 ]);
             },
             error: (err) => {
-                // console.log(err)
+                console.log(err)
             },
         })
     )
 
     //[API] pokemon search info
     const getPokemonSearchInfoAPI = useRef(
-        new API(`https://pokeapi.co/api/v2/pokemon/pikachu`, 'GET', {
+        new API(`https://pokeapi.co/api/v2/pokemon-species/pikachu`, 'GET', {
             success: (res) => {
                 let url = res.evolution_chain.url
                 getPokemonEvolutionChainAPI.current.setUrl(url)
                 getPokemonEvolutionChainAPI.current.call()
             },
             error: (err) => {
+                setPokemonList([])
                 console.log(err)
             },
         })
@@ -125,53 +130,57 @@ const UserMain = () => {
     )      
 
     const setPokemonLists = async (count: number) => {
-        for(let i=1; i<count; i++){
-            if(i > 1025) return
+        for(let i=1; i<153; i++){
             getPokemonInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${i}`) 
             await getPokemonInfoAPI.current.call()
         }
-    }
+    }   
     
-    //[API] pokemon search info
-    const tmpAPI = useRef(
-        new API(`https://pokeapi.co/api/v2/pokemon/pikachu`, 'GET', {
-            success: (res) => {
-                console.log(res)
-            },
-            error: (err) => {
-                console.log(err)
-            },
-        })
-    )      
-    
-    // search button onClick
+    //[Button] onClick search
     const onClickSearchPokemon = () => {
         setSearchList('')
+        setCurrentSearchResult(currentSearchTarget?.toLocaleLowerCase() ?? '')
         if(!currentSearchTarget || currentSearchTarget === '') {
             if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
             else return
         }else {
+            setStoredSearchData({ ...storedSearchData, search: currentSearchTarget,})
             getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${currentSearchTarget.toLocaleLowerCase()}`)
             getPokemonSearchInfoAPI.current.call()
         }
     }
 
     const onClickPokemonDetail = (value: PokemonListModel) => {
-        router.push(`/detail/pokemon?id=${value.id}`)
+        let searchRes = currentSearchResult ? `&search=${currentSearchResult}` : ''
+        let typeRes = storedSearchData.type !== '' ? `&type=${storedSearchData.type}` : ''
+        let genRes = storedSearchData.generation !== '' ? `&generation=${storedSearchData.generation}` : ''
+
+        // setStoredSearchData({ ...storedSearchData, search: currentSearchResult,})
+        let jsonStorage = JSON.stringify(storedSearchData)
+        sessionStorage.setItem('storage', jsonStorage)
+
+        router.push(`/detail/pokemon?id=${value.id}&page=${storedSearchData.page}${searchRes}${typeRes}${genRes}`)
     }
 
     const onChangePage = (page: number) => {
-        setPageNumber(page)
+        setStoredSearchData({
+            ...storedSearchData,
+            page: page,
+        })
     }
 
     // filter type change
     const onChangeTypeName = (e: string) => {
-        setCurrentFilterType(e)
+        if(e === '') return
+        if(e === 'total') setStoredSearchData({...storedSearchData, type: '',})
+        else setStoredSearchData({...storedSearchData, type: e,})
     }
 
     // filter generation change
     const onChangeGenrationName = (e: string) => {
-        setCurrentFilterGen(e)
+        if(e === '') return
+        if(e === 'total') setStoredSearchData({...storedSearchData, generation: '',})
+        else setStoredSearchData({...storedSearchData, generation: e,})
     }
 
     const onChangeSearchPokemon = (e: string) => {
@@ -180,15 +189,39 @@ const UserMain = () => {
 
     useEffect(() => {
         getPokemonTotalListAPI.current.call()
-        getPokemonTypeAPI.current.call()
         getPokemonGenerationAPI.current.call()
-        tmpAPI.current.setUrl(`https://pokeapi.co/api/v2/generation/9`)
-        tmpAPI.current.call()
+        getPokemonTypeAPI.current.call()
+        const storedJsonSessionData = sessionStorage.getItem('storage');
+        if(storedJsonSessionData){
+            const storedSessionData = JSON.parse(storedJsonSessionData);
+            console.log(storedJsonSessionData)
+            setStoredSearchData({
+                ...storedSearchData, 
+                search: storedSessionData.search.toLocaleLowerCase(),
+                type: storedSessionData.type.toLocaleLowerCase(),
+                generation: storedSessionData.generation.toLocaleLowerCase(),
+                page: storedSessionData.page,
+            })
+            if(storedSessionData.search !== ''){
+                getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${storedSessionData.search.toLocaleLowerCase()}`)
+                getPokemonSearchInfoAPI.current.call()
+            }
+        }
     }, [])
 
     useEffect(() => {
         if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
     }, [pokemonTotalListCount])
+
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            sessionStorage.clear();
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [])
 
     return (
         <>
@@ -203,8 +236,14 @@ const UserMain = () => {
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 onChangeSearchPokemon(e.currentTarget.value)
                             }}
+                            defaultValue={storedSearchData.search}
                         />
-                        <button className='searchButton' onClick={() => {onClickSearchPokemon()}}>Search</button>
+                        <button 
+                            className='searchButton'
+                            onClick={() => {onClickSearchPokemon()}}
+                        >
+                            Search
+                        </button>
                     </li>
                     <li style={{marginLeft: '20px'}}>
                         <select 
@@ -213,8 +252,9 @@ const UserMain = () => {
                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                                 onChangeTypeName(e.currentTarget.value)
                             }}
+                            value={storedSearchData.type}
                         >
-                            <option value="total">TOTAL</option>
+                            <option value="total">SELECT</option>
                             {pokemonTypeList.map((value, index) => {
                                 return (
                                     <option value={`${value.name}`}>{value.name?.toUpperCase()}</option>
@@ -229,11 +269,12 @@ const UserMain = () => {
                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                                 onChangeGenrationName(e.currentTarget.value)
                             }}
+                            value={storedSearchData.generation}
                         >
-                            <option value="total">TOTAL</option>
+                            <option value="total">SELECT</option>
                             {pokemonGenerationList.map((value, index) => {
                                 return (
-                                    <option value={`${value.name}`}>{value.name?.toUpperCase()}</option>
+                                    <option value={`${value.name.toLocaleLowerCase()}`}>{value.name?.toUpperCase()}</option>
                                 )
                             })}
                         </select>
@@ -261,19 +302,19 @@ const UserMain = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {pokemonList.filter((value, index, self) => 
+                        {pokemonList && pokemonList.length > 0 ? pokemonList.filter((value, index, self) => 
                             index === self.findIndex((e) => e.name === value.name)
                         ).filter(e => {
-                            if(currentFilterType === 'total') return e.type.indexOf('') >= 0
-                            else return e.type.indexOf(currentFilterType) >= 0
+                            if(storedSearchData.type === 'total') return e.type.indexOf('') >= 0
+                            else return e.type.indexOf(storedSearchData.type) >= 0
                         }).filter(e => {
-                            if(currentFilterGen === 'total') return e.gen.indexOf('') >= 0
-                            else return e.gen.toLowerCase().indexOf(currentFilterGen) >= 0
+                            if(storedSearchData.generation === 'total') return e.gen.indexOf('') >= 0
+                            else return e.gen.toLowerCase().indexOf(storedSearchData.generation.toLocaleLowerCase()) >= 0
                         }).filter((e => {
                             if(searchList === '') return searchList.indexOf('') >= 0
                             else return searchList.indexOf(e.name) >= 0
                         })).map((value, index) => {
-                            if((pageNumber*10) < value.id) return <></>
+                            if((storedSearchData.page*10) < value.id) return <></>
                             return (
                                 <>
                                     <tr 
@@ -288,11 +329,19 @@ const UserMain = () => {
                                     </tr>
                                 </>
                             )
-                        })}                                              
+                        }) : 
+                        <>
+                            <tr style={{textAlign: "center"}}>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>                            
+                        </>}  
                     </tbody>
                 </table>
             </div>
-            <Pagination onChangePage={onChangePage} page={pageNumber}/>
+            <Pagination onChangePage={onChangePage} page={storedSearchData.page}/>
         </>
     )
 }

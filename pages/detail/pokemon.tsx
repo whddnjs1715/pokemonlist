@@ -5,12 +5,7 @@ import API from "service/api";
 
 const PokemonDetail = () => {
     const router = useRouter();
-    const { id } = router.query;
-    // if(id && !Array.isArray(id)) {
-    //     console.log(parseInt(id))
-    //     // console.log(parseInt(id) === NaN)
-    //     console.log(isNaN(parseInt(id)))
-    // }
+    const { id, page, search } = router.query;
     const [pokemonDetail, setPokemonDetail] = useState<PokemonDetailInfoModel>({
         name: '',
         img: '',
@@ -28,6 +23,45 @@ const PokemonDetail = () => {
                     types: res.types,
                     stats: res.stats,
                 })
+                getPokemonSpeciesAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${res.name.toLocaleLowerCase()}`)
+                getPokemonSpeciesAPI.current.call()
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    ) 
+
+    //[API] pokemon species info
+    const getPokemonSpeciesAPI = useRef(
+        new API(`https://pokeapi.co/api/v2/pokemon-species/pikachu`, 'GET', {
+            success: (res) => {
+                let url = res.evolution_chain.url
+                getPokemonEvolutionChainAPI.current.setUrl(url)
+                getPokemonEvolutionChainAPI.current.call()
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    )       
+    
+    //[API] pokemon evolution chain info
+    const getPokemonEvolutionChainAPI = useRef(
+        new API(`https://pokeapi.co/api/v2/evolution-chain/1/`, 'GET', {
+            success: (res) => {
+                let arr = [] 
+                arr.push(res.chain.species.name ?? '')
+                if(res.chain.evolves_to && res.chain.evolves_to.length > 0) {
+                    for(let i=0; i<res.chain.evolves_to.length; i++){
+                        arr.push(res.chain.evolves_to[i].species.name ?? '')
+                        if(res.chain.evolves_to[i].evolves_to && res.chain.evolves_to[i].evolves_to.length > 0) {
+                            for(let j=0; j<res.chain.evolves_to[i].evolves_to.length; j++){
+                                arr.push(res.chain.evolves_to[i].evolves_to[j].species.name ?? '')
+                            }
+                        }
+                    }
+                }
             },
             error: (err) => {
                 console.log(err)
@@ -35,27 +69,15 @@ const PokemonDetail = () => {
         })
     )
 
-    const getPokemonEvolutionAPI = useRef(
-        new API(`https://pokeapi.co/api/v2/evolution-chain/1/`, 'GET', {
-            success: (res) => {
-                console.log('res', res)
-            },
-            error: (err) => {
-                console.log(err)
-            },
-        })
-    )    
-    
     useEffect(() => {
         if(!id) return
         if(Array.isArray(id)) return
-        router.push(`http://localhost:3000/detail/pokemon?id=${parseInt(id)}`)
+        // router.push(`/detail/pokemon?id=${parseInt(id)}&page=${page}&search=${search}`)
         getPokemonDetailAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${parseInt(id)}`)
         getPokemonDetailAPI.current.call()
-        // getPokemonEvolutionAPI.current.setUrl(`https://pokeapi.co/api/v2/evolution-chain/${id}`)
-        // getPokemonEvolutionAPI.current.call()
     }, [id])
 
+    if(!id) return (<><h1>No Page</h1></>)
     if(id && Array.isArray(id)) return (<><h1>No Page</h1></>)
     if(id && !Array.isArray(id) && isNaN(parseInt(id))) return (<><h1>No Page</h1></>)
 
