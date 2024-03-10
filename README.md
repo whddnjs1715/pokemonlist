@@ -18,8 +18,9 @@
 <br>
 
 2. search
-  <iframe src="https://github.com/whddnjs1715/pokemonlist/assets/73818206/64f8c0b8-0259-4f22-baf7-44dbda63c195"></iframe>
+   ![화면 기록 2024-03-10 22 15 42](https://github.com/whddnjs1715/pokemonlist/assets/73818206/d13dab26-c7f0-4278-b741-fea46bb95a53)
 <br>
+
 
 
 
