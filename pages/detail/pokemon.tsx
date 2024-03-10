@@ -140,6 +140,7 @@ const PokemonDetail = () => {
                                 let upperCase = value.type.name?.toLocaleUpperCase()
                                 return (
                                     <span 
+                                        key={`pokemon_type_${index}`}
                                         style={{background: '#9E2A22', padding: '10px', marginRight: '5px', color: '#fff', fontWeight: '500'}}
                                     >
                                         {upperCase}
@@ -153,7 +154,7 @@ const PokemonDetail = () => {
                         >
                             {pokemonDetail.stats.map((value:PokemonInfoStatsModel, index:number) => {
                                 return (
-                                    <p>
+                                    <p key={`pokemon_stat_${index}`}>
                                         <span style={{fontSize: '25px', fontWeight: '1000'}}>{value.stat.name ?? ''} : </span>
                                         <span style={{fontSize: '20px', fontWeight: '500'}}>{value.base_stat ?? ''}</span>
                                     </p>
@@ -165,7 +166,10 @@ const PokemonDetail = () => {
                                 index === self.findIndex((e) => e.name === value.name)
                                 ).map((value, index) => {
                                     return (
-                                        <div style={value.current ? {border: '1px solid rgba(255, 0, 0, 1)'} : {}}>
+                                        <div 
+                                            key={`pokemon_evolution_${index}`}
+                                            style={value.current ? {border: '1px solid rgba(255, 0, 0, 1)'} : {}}
+                                        >
                                             <img src={value.img ?? ''}/>
                                             <p style={{textAlign: "center"}}>{value.name}</p>
                                         </div>

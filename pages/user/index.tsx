@@ -250,7 +250,12 @@ const UserMain = () => {
                             <option value="total">SELECT</option>
                             {pokemonTypeList.map((value, index) => {
                                 return (
-                                    <option value={`${value.name}`}>{value.name?.toUpperCase()}</option>
+                                    <option 
+                                        key={`option_type_${index}`}
+                                        value={`${value.name}`}
+                                    >
+                                        {value.name?.toUpperCase()}
+                                    </option>
                                 )
                             })}
                         </select>
@@ -267,7 +272,12 @@ const UserMain = () => {
                             <option value="total">SELECT</option>
                             {pokemonGenerationList.map((value, index) => {
                                 return (
-                                    <option value={`${value.name.toLocaleLowerCase()}`}>{value.name?.toUpperCase()}</option>
+                                    <option 
+                                        key={`option_gen_${index}`}
+                                        value={`${value.name.toLocaleLowerCase()}`}
+                                    >
+                                        {value.name?.toUpperCase()}
+                                    </option>
                                 )
                             })}
                         </select>
