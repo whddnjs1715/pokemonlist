@@ -18,7 +18,7 @@
 <br>
 
 2. search
-https://github.com/whddnjs1715/pokemonlist/assets/73818206/64f8c0b8-0259-4f22-baf7-44dbda63c195
+  <iframe src="https://github.com/whddnjs1715/pokemonlist/assets/73818206/64f8c0b8-0259-4f22-baf7-44dbda63c195"></iframe>
 <br>
 
 
