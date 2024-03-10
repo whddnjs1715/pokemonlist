@@ -11,7 +11,6 @@ const UserMain = () => {
     const [pokemonTypeList, setPokemonTypeList] = useState<Array<PokemonInfoStatsStatModel>>([])
     const [pokemonGenerationList, setPokemonGenerationList] = useState<Array<PokemonInfoStatsStatModel>>([])
     const [currentSearchTarget, setCurrentSearchTarget] = useState<string>('')
-    const [currentSearchResult, setCurrentSearchResult] = useState<string>('')
     const [storedSearchData, setStoredSearchData] = useState<PokemonSessionStorageDataModel>({
         page: 1,
         type: '',
@@ -139,7 +138,6 @@ const UserMain = () => {
     //[Button] onClick search
     const onClickSearchPokemon = () => {
         setSearchList('')
-        setCurrentSearchResult(currentSearchTarget?.toLocaleLowerCase() ?? '')
         if(!currentSearchTarget || currentSearchTarget === '') {
             if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
             else return
@@ -151,15 +149,11 @@ const UserMain = () => {
     }
 
     const onClickPokemonDetail = (value: PokemonListModel) => {
-        let searchRes = currentSearchResult ? `&search=${currentSearchResult}` : ''
-        let typeRes = storedSearchData.type !== '' ? `&type=${storedSearchData.type}` : ''
-        let genRes = storedSearchData.generation !== '' ? `&generation=${storedSearchData.generation}` : ''
-
-        // setStoredSearchData({ ...storedSearchData, search: currentSearchResult,})
+        console.log(value)
         let jsonStorage = JSON.stringify(storedSearchData)
         sessionStorage.setItem('storage', jsonStorage)
 
-        router.push(`/detail/pokemon?id=${value.id}&page=${storedSearchData.page}${searchRes}${typeRes}${genRes}`)
+        router.push(`/detail/pokemon?id=${value.id}&name=${value.name}`)
     }
 
     const onChangePage = (page: number) => {
@@ -194,7 +188,6 @@ const UserMain = () => {
         const storedJsonSessionData = sessionStorage.getItem('storage');
         if(storedJsonSessionData){
             const storedSessionData = JSON.parse(storedJsonSessionData);
-            console.log(storedJsonSessionData)
             setStoredSearchData({
                 ...storedSearchData, 
                 search: storedSessionData.search.toLocaleLowerCase(),

@@ -1,17 +1,18 @@
-import { PaginationProps, PokemonDetailInfoModel, PokemonInfoStatsModel, PokemonInfoTypesModel } from "model/pokemonmodel";
+import { PaginationProps, PokemonDetailInfoModel, PokemonInfoStatsModel, PokemonInfoTypesModel, pokemonEvolutionListModel } from "model/pokemonmodel";
 import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react";
 import API from "service/api";
 
 const PokemonDetail = () => {
     const router = useRouter();
-    const { id, page, search } = router.query;
+    const { id } = router.query;
     const [pokemonDetail, setPokemonDetail] = useState<PokemonDetailInfoModel>({
         name: '',
         img: '',
         types: [],
         stats: [],
     })
+    const [pokemonEvolutionList, setPokemonEvolutionList] = useState<Array<pokemonEvolutionListModel>>([])
 
     const getPokemonDetailAPI = useRef(
         new API(`https://pokeapi.co/api/v2/pokemon/1`, 'GET', {
@@ -50,18 +51,19 @@ const PokemonDetail = () => {
     const getPokemonEvolutionChainAPI = useRef(
         new API(`https://pokeapi.co/api/v2/evolution-chain/1/`, 'GET', {
             success: (res) => {
-                let arr = [] 
-                arr.push(res.chain.species.name ?? '')
+                let evolutionList = [] 
+                evolutionList.push(res.chain.species.name ?? '')                
                 if(res.chain.evolves_to && res.chain.evolves_to.length > 0) {
                     for(let i=0; i<res.chain.evolves_to.length; i++){
-                        arr.push(res.chain.evolves_to[i].species.name ?? '')
+                        evolutionList.push(res.chain.evolves_to[i].species.name ?? '')
                         if(res.chain.evolves_to[i].evolves_to && res.chain.evolves_to[i].evolves_to.length > 0) {
                             for(let j=0; j<res.chain.evolves_to[i].evolves_to.length; j++){
-                                arr.push(res.chain.evolves_to[i].evolves_to[j].species.name ?? '')
+                                evolutionList.push(res.chain.evolves_to[i].evolves_to[j].species.name ?? '')
                             }
                         }
                     }
                 }
+                getPokemonEvolutionImg(evolutionList)
             },
             error: (err) => {
                 console.log(err)
@@ -69,10 +71,34 @@ const PokemonDetail = () => {
         })
     )
 
+    const getPokemonEvolutionChainImgAPI = useRef(
+        new API(`https://pokeapi.co/api/v2/pokemon/1`, 'GET', {
+            success: (res) => {
+                setPokemonEvolutionList(prevItems => [
+                    ...prevItems,
+                    {
+                        current: res.name === router.query.name ? true : false,
+                        name: res.name ?? '',
+                        img: res.sprites.front_default ?? '',
+                    }
+                ]);
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    )     
+
+    const getPokemonEvolutionImg = async (list: Array<string>) => {
+        for(let i=0; i<list.length; i++){
+            getPokemonEvolutionChainImgAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${list[i]}`)
+            await getPokemonEvolutionChainImgAPI.current.call()
+        }
+    }
+
     useEffect(() => {
         if(!id) return
         if(Array.isArray(id)) return
-        // router.push(`/detail/pokemon?id=${parseInt(id)}&page=${page}&search=${search}`)
         getPokemonDetailAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${parseInt(id)}`)
         getPokemonDetailAPI.current.call()
     }, [id])
@@ -133,6 +159,19 @@ const PokemonDetail = () => {
                                     </p>
                                 )
                             })}
+                        </div>
+                        <div style={{display: 'flex', marginTop: '20px'}}>
+                            {pokemonEvolutionList.filter((value, index, self) => 
+                                index === self.findIndex((e) => e.name === value.name)
+                                ).map((value, index) => {
+                                    return (
+                                        <div style={value.current ? {border: '1px solid rgba(255, 0, 0, 1)'} : {}}>
+                                            <img src={value.img ?? ''}/>
+                                            <p style={{textAlign: "center"}}>{value.name}</p>
+                                        </div>
+                                    )
+                                })
+                            }
                         </div>
                     </div>
                 </div>

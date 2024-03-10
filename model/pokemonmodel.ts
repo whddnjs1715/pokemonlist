@@ -69,3 +69,9 @@ export interface PokemonSessionStorageDataModel {
     generation: string,
     search: string,
 }
+
+export interface pokemonEvolutionListModel {
+    current: boolean,
+    name: string,
+    img: string,
+}
