@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react'
+import {useEffect, useRef, useState, KeyboardEvent} from 'react'
 import API from 'service/api'
 import {PokemonInfoStatsStatModel, PokemonInfoTypesModel, PokemonListModel, PokemonFilterListModel, PokemonSessionStorageDataModel} from 'model/pokemonmodel'
 import { useRouter } from 'next/router';
@@ -65,7 +65,7 @@ const UserMain = () => {
                     else types += value.type.name
                 })
                 let generation = 'Generation-i'
-                if(res.id > 3 && res.id <252) generation = 'Generation-ii'
+                if(res.id > 151 && res.id <252) generation = 'Generation-ii'
                 else if(res.id > 251 && res.id < 387) generation = 'Generation-iii'
                 else if(res.id > 386 && res.id < 495) generation = 'Generation-iv'
                 else if(res.id > 494 && res.id < 650) generation = 'Generation-v'
@@ -129,7 +129,7 @@ const UserMain = () => {
     )      
 
     const setPokemonLists = async (count: number) => {
-        for(let i=1; i<153; i++){
+        for(let i=1; i<=1025; i++){
             getPokemonInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${i}`) 
             await getPokemonInfoAPI.current.call()
         }
@@ -181,6 +181,10 @@ const UserMain = () => {
         setCurrentSearchTarget(e)
     }
 
+    const onKeyDownEnter = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') onClickSearchPokemon()
+      }    
+
     useEffect(() => {
         getPokemonTotalListAPI.current.call()
         getPokemonGenerationAPI.current.call()
@@ -230,6 +234,7 @@ const UserMain = () => {
                                 onChangeSearchPokemon(e.currentTarget.value)
                             }}
                             defaultValue={storedSearchData.search}
+                            onKeyDown={onKeyDownEnter}
                         />
                         <button 
                             className='searchButton'
