@@ -12,13 +12,13 @@ import Pagination from 'components/common/pagination'
 
 const UserMain = () => {
     const router = useRouter();
-    //[변수] 총 포켓몬 수 확인을 위한 변수 Total Pokemon Count
+    //[변수] 총 포켓몬 수 확인을 위한 변수 / Total Pokemon Count
     const [pokemonTotalListCount, setPokemonTotalListCount] = useState<number | undefined>(undefined)
     //[변수] 실 포켓몬 리스트 변수 Pokemon List
     const [pokemonList, setPokemonList] = useState<Array<PokemonListModel>>([])
-    //[변수] 포켓몬 타입 필터를 위한 모든 포켓몬 타입 리스트 변수 Pokemon Type List for filter
+    //[변수] 포켓몬 타입 필터를 위한 모든 포켓몬 타입 리스트 변수 / Pokemon Type List for filter
     const [pokemonTypeList, setPokemonTypeList] = useState<Array<PokemonInfoStatsStatModel>>([])
-    //[변수] 포켓몬 세대 필터를 위한 모든 포켓몬 세대 리스트 변수 Pokemon Generations List for filter
+    //[변수] 포켓몬 세대 필터를 위한 모든 포켓몬 세대 리스트 변수 / Pokemon Generations List for filter
     const [pokemonGenerationList, setPokemonGenerationList] = useState<Array<PokemonInfoStatsStatModel>>([])
     //[변수] 검색창에 입력시 현재 검색어를 보여주는 변수
     const [currentSearchTarget, setCurrentSearchTarget] = useState<string>('')
