@@ -1,6 +1,12 @@
-import {useEffect, useRef, useState, KeyboardEvent} from 'react'
+import {useEffect, useRef, useState, KeyboardEvent, SyntheticEvent} from 'react'
 import API from 'service/api'
-import {PokemonInfoStatsStatModel, PokemonInfoTypesModel, PokemonListModel, PokemonFilterListModel, PokemonSessionStorageDataModel} from 'model/pokemonmodel'
+import {
+    PokemonInfoStatsStatModel, 
+    PokemonInfoTypesModel, 
+    PokemonListModel, 
+    PokemonFilterListModel, 
+    PokemonSessionStorageDataModel
+} from 'model/pokemonmodel'
 import { useRouter } from 'next/router';
 import Pagination from 'components/common/pagination'
 
@@ -11,13 +17,16 @@ const UserMain = () => {
     const [pokemonTypeList, setPokemonTypeList] = useState<Array<PokemonInfoStatsStatModel>>([])
     const [pokemonGenerationList, setPokemonGenerationList] = useState<Array<PokemonInfoStatsStatModel>>([])
     const [currentSearchTarget, setCurrentSearchTarget] = useState<string>('')
+    const [searchList, setSearchList] = useState<string>('')
+    const myElementRef = useRef<HTMLUListElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const elementDiv = myElementRef.current;
     const [storedSearchData, setStoredSearchData] = useState<PokemonSessionStorageDataModel>({
         page: 1,
         type: '',
         generation: '',
         search: '',
     })
-    const [searchList, setSearchList] = useState<string>('')
 
     //[API] pokemon list
     const getPokemonTotalListAPI = useRef(
@@ -180,12 +189,37 @@ const UserMain = () => {
 
     const onChangeSearchPokemon = (e: string) => {
         setCurrentSearchTarget(e)
+        const CurrentE = e
+        if(e === '') {
+            if(elementDiv) elementDiv.innerHTML = ""
+            return
+        }
+        
+        if(elementDiv) elementDiv.innerHTML = ""
+        pokemonList.filter(e => e.name.startsWith(CurrentE) || e.name.toString() === CurrentE).map((value, index) => {
+            if(index > 10) return
+            const elementLi = document.createElement("li");
+            elementLi.style.cursor= 'pointer'
+            elementLi.className = 'relKeywordsLi'
+            elementLi.innerHTML = value.name;
+            if(elementDiv) elementDiv.appendChild(elementLi)
+        })
     }
+
+    const handleClick = (e: SyntheticEvent<HTMLUListElement, MouseEvent>) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'LI') {
+            if(inputRef.current) inputRef.current.value = target.textContent ?? ''
+            setCurrentSearchTarget(target.textContent ?? '');
+            setStoredSearchData({ ...storedSearchData, search: target.textContent ?? '',})
+            if(elementDiv) elementDiv.innerHTML = ""
+        }
+    }; 
 
     // search Enter
     const onKeyDownEnter = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') onClickSearchPokemon()
-      }    
+    }
 
     useEffect(() => {
         getPokemonTotalListAPI.current.call()
@@ -216,6 +250,7 @@ const UserMain = () => {
         const handleBeforeUnload = () => {
             sessionStorage.clear();
         };
+
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -237,7 +272,18 @@ const UserMain = () => {
                             }}
                             defaultValue={storedSearchData.search}
                             onKeyDown={onKeyDownEnter}
+                            ref={inputRef}
                         />
+                        <div 
+                            className='relSearch'
+                            style={{border: '1px solid rgba(0,0,0, 0.1)', borderRadius: '6px'}}
+                        >
+                            <ul className="relKeywords" ref={myElementRef} style={{listStyle: 'none', marginRight: '30px'}} onClick={handleClick}>
+                            </ul>
+                        </div>
+                        
+                    </li>
+                    <li>
                         <button 
                             className='searchButton'
                             onClick={() => {onClickSearchPokemon()}}
