@@ -99,7 +99,8 @@ const UserMain = () => {
             },
             error: (err) => {
                 setPokemonList([])
-                console.log(err)
+                alert('No Pokémon found in the search.')
+                console.log('err', err)
             },
         })
     )    
@@ -139,6 +140,7 @@ const UserMain = () => {
     const onClickSearchPokemon = () => {
         setSearchList('')
         if(!currentSearchTarget || currentSearchTarget === '') {
+            alert('Please enter the search term.')
             if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
             else return
         }else {
@@ -149,7 +151,6 @@ const UserMain = () => {
     }
 
     const onClickPokemonDetail = (value: PokemonListModel) => {
-        console.log(value)
         let jsonStorage = JSON.stringify(storedSearchData)
         sessionStorage.setItem('storage', jsonStorage)
 
@@ -181,6 +182,7 @@ const UserMain = () => {
         setCurrentSearchTarget(e)
     }
 
+    // search Enter
     const onKeyDownEnter = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') onClickSearchPokemon()
       }    
@@ -330,10 +332,10 @@ const UserMain = () => {
                                         style={{textAlign: "center", cursor: "pointer"}}
                                         onClick={() => {onClickPokemonDetail(value)}}
                                     >
-                                        <td>{value.id}</td>
-                                        <td>{value.name}</td>
-                                        <td>{value.gen}</td>
-                                        <td>{value.type}</td>
+                                        <td>{value.id ?? '-'}</td>
+                                        <td>{value.name ?? '-'}</td>
+                                        <td>{value.gen ?? '-'}</td>
+                                        <td>{value.type ?? '-'}</td>
                                     </tr>
                                 </>
                             )
