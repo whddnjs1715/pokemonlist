@@ -12,15 +12,25 @@ import Pagination from 'components/common/pagination'
 
 const UserMain = () => {
     const router = useRouter();
+    //[변수] 총 포켓몬 수 확인을 위한 변수 Total Pokemon Count
     const [pokemonTotalListCount, setPokemonTotalListCount] = useState<number | undefined>(undefined)
+    //[변수] 실 포켓몬 리스트 변수 Pokemon List
     const [pokemonList, setPokemonList] = useState<Array<PokemonListModel>>([])
+    //[변수] 포켓몬 타입 필터를 위한 모든 포켓몬 타입 리스트 변수 Pokemon Type List for filter
     const [pokemonTypeList, setPokemonTypeList] = useState<Array<PokemonInfoStatsStatModel>>([])
+    //[변수] 포켓몬 세대 필터를 위한 모든 포켓몬 세대 리스트 변수 Pokemon Generations List for filter
     const [pokemonGenerationList, setPokemonGenerationList] = useState<Array<PokemonInfoStatsStatModel>>([])
+    //[변수] 검색창에 입력시 현재 검색어를 보여주는 변수
     const [currentSearchTarget, setCurrentSearchTarget] = useState<string>('')
+    //[변수] 검색한 포켓몬 진화 체인 리스트를 담는 변수
     const [searchList, setSearchList] = useState<string>('')
-    const myElementRef = useRef<HTMLUListElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const elementDiv = myElementRef.current;
+    //[변수] ul 태그를 담은 변수(추천 검색어를 보여주기 위함)
+    const ulElementRef = useRef<HTMLUListElement>(null);
+    //[변수] input 태그를 담은 변수(추천 검색어를 보여주기 위함)
+    const inputElementRef = useRef<HTMLInputElement>(null);
+    //[변수] ul 태그를 담은 변수
+    const ulElementCurrent = ulElementRef.current;
+    //[변수] 기본 검색 정보(페이지, 타입, 세대, 검색어) 세션스토리지 및 default value에 사용하기 위함
     const [storedSearchData, setStoredSearchData] = useState<PokemonSessionStorageDataModel>({
         page: 1,
         type: '',
@@ -28,7 +38,9 @@ const UserMain = () => {
         search: '',
     })
 
-    //[API] pokemon list
+    //// Make List Start ----
+
+    //[API] 총 포켓몬 수 확인을 위한 API / Total Pokemon list API
     const getPokemonTotalListAPI = useRef(
         new API(`https://pokeapi.co/api/v2/pokemon`, 'GET', {
             success: (res) => {
@@ -38,33 +50,22 @@ const UserMain = () => {
                 console.log(err)
             },
         })
-    )   
-    
-    //[API] type
-    const getPokemonTypeAPI = useRef(
-        new API(`https://pokeapi.co/api/v2/type`, 'GET', {
-            success: (res: PokemonFilterListModel) => {
-                setPokemonTypeList(res.results)
-            },
-            error: (err) => {
-                console.log(err)
-            },
-        })
-    ) 
-    
-    //[API] generation
-    const getPokemonGenerationAPI = useRef(
-        new API(`https://pokeapi.co/api/v2/generation`, 'GET', {
-            success: (res: PokemonFilterListModel) => {
-                setPokemonGenerationList(res.results)
-            },
-            error: (err) => {
-                console.log(err)
-            },
-        })
-    )     
+    )
 
-    //[API] pokemon info
+    useEffect(() => {
+        if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
+    }, [pokemonTotalListCount])    
+
+    //[fun] 총 포켓몬 수 만큼 포켓몬 반복문을 통해 포켓몬 정보 API 호출
+    const setPokemonLists = async (count: number) => {
+        for(let i=1; i<=count; i++){
+            if(i>1025) return
+            getPokemonInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${i}`) 
+            await getPokemonInfoAPI.current.call()
+        }
+    }    
+
+    //[API] 포켓몬 타입,세대,이름을 조회하는 API / Pokemon info(Type, Generation, Name) API
     const getPokemonInfoAPI = useRef(
         new API(`https://pokeapi.co/api/v2/pokemon/1`, 'GET', {
             success: (res) => {
@@ -98,7 +99,108 @@ const UserMain = () => {
         })
     )
 
-    //[API] pokemon search info
+    //[API] 총 포켓몬 타입 리스트 API / Total Pokemon Type API
+    const getPokemonTypeAPI = useRef(
+        new API(`https://pokeapi.co/api/v2/type`, 'GET', {
+            success: (res: PokemonFilterListModel) => {
+                setPokemonTypeList(res.results)
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    )     
+
+    //[API] 총 포켓몬 세대 리스트 API / Total Pokemon Generation API
+    const getPokemonGenerationAPI = useRef(
+        new API(`https://pokeapi.co/api/v2/generation`, 'GET', {
+            success: (res: PokemonFilterListModel) => {
+                setPokemonGenerationList(res.results)
+            },
+            error: (err) => {
+                console.log(err)
+            },
+        })
+    )
+
+    useEffect(() => {
+        getPokemonTotalListAPI.current.call()
+        getPokemonGenerationAPI.current.call()
+        getPokemonTypeAPI.current.call()
+        const storedJsonSessionData = sessionStorage.getItem('storage');
+        if(storedJsonSessionData){
+            const storedSessionData = JSON.parse(storedJsonSessionData);
+            setStoredSearchData({
+                ...storedSearchData, 
+                search: storedSessionData.search.toLocaleLowerCase(),
+                type: storedSessionData.type.toLocaleLowerCase(),
+                generation: storedSessionData.generation.toLocaleLowerCase(),
+                page: storedSessionData.page,
+            })
+            if(storedSessionData.search !== ''){
+                getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${storedSessionData.search.toLocaleLowerCase()}`)
+                getPokemonSearchInfoAPI.current.call()
+            }
+        }
+    }, [])    
+
+
+    //// Make List Finish ----
+
+    //// Pokemon Search Start ----
+
+    //[fun] input창에 검색어를 입력하면 검색어를 바꿔서 보여주는 기능 / Type Keyword Show Search Bar
+    //[fun] input창에 검색어를 입력하면 추천 검색어를 보여주는 기능 / Type Keyword Show Similar Pokemon Name list
+    const onChangeSearchPokemon = (e: string) => {
+        setCurrentSearchTarget(e)
+        const CurrentE = e
+        if(e === '') {
+            if(ulElementCurrent) ulElementCurrent.innerHTML = ""
+            return
+        }
+        
+        if(ulElementCurrent) ulElementCurrent.innerHTML = ""
+        pokemonList.filter(e => e.name.startsWith(CurrentE) || e.name.toString() === CurrentE).map((value, index) => {
+            if(index > 10) return
+            const elementLi = document.createElement("li");
+            elementLi.style.cursor= 'pointer'
+            elementLi.className = 'relKeywordsLi'
+            elementLi.innerHTML = value.name;
+            if(ulElementCurrent) ulElementCurrent.appendChild(elementLi)
+        })
+    }
+
+    //[fun] input창에 추천 검색어를 클릭하면 input창에 보여주는 기능 / Click Similar Pokemon Name list show in Search Bar
+    const onClickAppendChild = (e: SyntheticEvent<HTMLUListElement, MouseEvent>) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'LI') {
+            if(inputElementRef.current) inputElementRef.current.value = target.textContent ?? ''
+            setCurrentSearchTarget(target.textContent ?? '');
+            setStoredSearchData({ ...storedSearchData, search: target.textContent ?? '',})
+            if(ulElementCurrent) ulElementCurrent.innerHTML = ""
+        }
+    }
+
+    //[fun] 포켓몬 검색하는 기능 / Search Pokemon 
+    const onClickSearchPokemon = () => {
+        setSearchList('')
+        if(!currentSearchTarget || currentSearchTarget === '') {
+            alert('Please enter the search term.')
+            if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
+            else return
+        }else {
+            setStoredSearchData({ ...storedSearchData, search: currentSearchTarget,})
+            getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${currentSearchTarget.toLocaleLowerCase()}`)
+            getPokemonSearchInfoAPI.current.call()
+        }
+    }
+
+    //[fun] input창에 입력후 엔터 시 검색할 수 있게하는 기능 / function for Search with 'Enter'
+    const onKeyDownEnter = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') onClickSearchPokemon()
+    }    
+
+    //[API] 검색한 포켓몬의 진화 넘버를 알기위한 API / Search Pokemon Evolution Chain Number API
     const getPokemonSearchInfoAPI = useRef(
         new API(`https://pokeapi.co/api/v2/pokemon-species/pikachu`, 'GET', {
             success: (res) => {
@@ -112,9 +214,9 @@ const UserMain = () => {
                 console.log('err', err)
             },
         })
-    )    
+    ) 
 
-    //[API] pokemon evolution-chain
+    //[API] 검색한 포켓몬의 진화 종류를 알기위한 API / Search Pokemon Evolution Chain Info API
     const getPokemonEvolutionChainAPI = useRef(
         new API(``, 'GET', {
             success: (res) => {
@@ -136,36 +238,11 @@ const UserMain = () => {
                 console.log(err)
             },
         })
-    )      
+    )     
 
-    const setPokemonLists = async (count: number) => {
-        for(let i=1; i<=1025; i++){
-            getPokemonInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon/${i}`) 
-            await getPokemonInfoAPI.current.call()
-        }
-    }   
-    
-    //[Button] onClick search
-    const onClickSearchPokemon = () => {
-        setSearchList('')
-        if(!currentSearchTarget || currentSearchTarget === '') {
-            alert('Please enter the search term.')
-            if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
-            else return
-        }else {
-            setStoredSearchData({ ...storedSearchData, search: currentSearchTarget,})
-            getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${currentSearchTarget.toLocaleLowerCase()}`)
-            getPokemonSearchInfoAPI.current.call()
-        }
-    }
+    //// Pokemon Search Finsih ----
 
-    const onClickPokemonDetail = (value: PokemonListModel) => {
-        let jsonStorage = JSON.stringify(storedSearchData)
-        sessionStorage.setItem('storage', jsonStorage)
-
-        router.push(`/detail/pokemon?id=${value.id}&name=${value.name}`)
-    }
-
+    //[fun] 포켓몬 리스트를 더 보여주는 버튼 / More Pokemon List Button
     const onChangePage = (page: number) => {
         setStoredSearchData({
             ...storedSearchData,
@@ -173,79 +250,30 @@ const UserMain = () => {
         })
     }
 
-    // filter type change
+    //[fun] 포켓몬 타입 필터 기능 / Pokemon Filter Type Change
     const onChangeTypeName = (e: string) => {
         if(e === '') return
         if(e === 'total') setStoredSearchData({...storedSearchData, type: '',})
         else setStoredSearchData({...storedSearchData, type: e,})
     }
 
-    // filter generation change
+    //[fun] 포켓몬 세대 필터 기능 / Pokemon Filter Genration Change
     const onChangeGenrationName = (e: string) => {
         if(e === '') return
         if(e === 'total') setStoredSearchData({...storedSearchData, generation: '',})
         else setStoredSearchData({...storedSearchData, generation: e,})
     }
 
-    const onChangeSearchPokemon = (e: string) => {
-        setCurrentSearchTarget(e)
-        const CurrentE = e
-        if(e === '') {
-            if(elementDiv) elementDiv.innerHTML = ""
-            return
-        }
-        
-        if(elementDiv) elementDiv.innerHTML = ""
-        pokemonList.filter(e => e.name.startsWith(CurrentE) || e.name.toString() === CurrentE).map((value, index) => {
-            if(index > 10) return
-            const elementLi = document.createElement("li");
-            elementLi.style.cursor= 'pointer'
-            elementLi.className = 'relKeywordsLi'
-            elementLi.innerHTML = value.name;
-            if(elementDiv) elementDiv.appendChild(elementLi)
-        })
-    }
+    //[fun] 포켓몬 디테일 페이지로 이동하는 기능 / Move Pokemon Detail Page
+    //[fun] 리스트 페이지로 돌아와서도 검색한 정보를 남겨놓기위한 세션스토리지에 정보 저장 / Save Search Info in Session Storage
+    const onClickPokemonDetail = (value: PokemonListModel) => {
+        let jsonStorage = JSON.stringify(storedSearchData)
+        sessionStorage.setItem('storage', jsonStorage)
 
-    const handleClick = (e: SyntheticEvent<HTMLUListElement, MouseEvent>) => {
-        const target = e.target as HTMLElement;
-        if (target.tagName === 'LI') {
-            if(inputRef.current) inputRef.current.value = target.textContent ?? ''
-            setCurrentSearchTarget(target.textContent ?? '');
-            setStoredSearchData({ ...storedSearchData, search: target.textContent ?? '',})
-            if(elementDiv) elementDiv.innerHTML = ""
-        }
-    }; 
+        router.push(`/detail/pokemon?id=${value.id}&name=${value.name}`)
+    }    
 
-    // search Enter
-    const onKeyDownEnter = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') onClickSearchPokemon()
-    }
-
-    useEffect(() => {
-        getPokemonTotalListAPI.current.call()
-        getPokemonGenerationAPI.current.call()
-        getPokemonTypeAPI.current.call()
-        const storedJsonSessionData = sessionStorage.getItem('storage');
-        if(storedJsonSessionData){
-            const storedSessionData = JSON.parse(storedJsonSessionData);
-            setStoredSearchData({
-                ...storedSearchData, 
-                search: storedSessionData.search.toLocaleLowerCase(),
-                type: storedSessionData.type.toLocaleLowerCase(),
-                generation: storedSessionData.generation.toLocaleLowerCase(),
-                page: storedSessionData.page,
-            })
-            if(storedSessionData.search !== ''){
-                getPokemonSearchInfoAPI.current.setUrl(`https://pokeapi.co/api/v2/pokemon-species/${storedSessionData.search.toLocaleLowerCase()}`)
-                getPokemonSearchInfoAPI.current.call()
-            }
-        }
-    }, [])
-
-    useEffect(() => {
-        if(pokemonTotalListCount && pokemonTotalListCount>0) setPokemonLists(pokemonTotalListCount)
-    }, [pokemonTotalListCount])
-
+    //[fun] 새로고침 시 세션스토리지 검색 정보 제거 / Delete Session Storage Info with Refresh
     useEffect(() => {
         const handleBeforeUnload = () => {
             sessionStorage.clear();
@@ -272,13 +300,18 @@ const UserMain = () => {
                             }}
                             defaultValue={storedSearchData.search}
                             onKeyDown={onKeyDownEnter}
-                            ref={inputRef}
+                            ref={inputElementRef}
                         />
                         <div 
                             className='relSearch'
                             style={{border: '1px solid rgba(0,0,0, 0.1)', borderRadius: '6px'}}
                         >
-                            <ul className="relKeywords" ref={myElementRef} style={{listStyle: 'none', marginRight: '30px'}} onClick={handleClick}>
+                            <ul 
+                                className="relKeywords" 
+                                ref={ulElementRef} 
+                                style={{listStyle: 'none', marginRight: '30px'}} 
+                                onClick={onClickAppendChild}
+                            >
                             </ul>
                         </div>
                         
