@@ -1,7 +1,12 @@
-import { PaginationProps, PokemonDetailInfoModel, PokemonInfoStatsModel, PokemonInfoTypesModel, pokemonEvolutionListModel } from "model/pokemonmodel";
 import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react";
 import API from "service/api";
+import { 
+    PokemonDetailInfoModel, 
+    PokemonInfoStatsModel, 
+    PokemonInfoTypesModel, 
+    pokemonEvolutionListModel 
+} from "model/pokemonmodel";
 
 const PokemonDetail = () => {
     const router = useRouter();

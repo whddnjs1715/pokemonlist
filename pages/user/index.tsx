@@ -1,5 +1,8 @@
 import {useEffect, useRef, useState, KeyboardEvent, SyntheticEvent} from 'react'
 import API from 'service/api'
+import { useRouter } from 'next/router';
+import Pagination from 'components/common/pagination'
+import Common from 'styles/common.module.scss'
 import {
     PokemonInfoStatsStatModel, 
     PokemonInfoTypesModel, 
@@ -7,8 +10,6 @@ import {
     PokemonFilterListModel, 
     PokemonSessionStorageDataModel
 } from 'model/pokemonmodel'
-import { useRouter } from 'next/router';
-import Pagination from 'components/common/pagination'
 
 const UserMain = () => {
     const router = useRouter();
@@ -287,11 +288,8 @@ const UserMain = () => {
 
     return (
         <>
-            <div className='searchWrap'>
-                <ul 
-                    className='SearchUl'
-                    style={{listStyle: 'none', display: 'flex'}}
-                >
+            <div >
+                <ul className={Common.SearchUl}>
                     <li>
                         <input 
                             className='searchInput'
@@ -302,14 +300,10 @@ const UserMain = () => {
                             onKeyDown={onKeyDownEnter}
                             ref={inputElementRef}
                         />
-                        <div 
-                            className='relSearch'
-                            style={{border: '1px solid rgba(0,0,0, 0.1)', borderRadius: '6px'}}
-                        >
+                        <div className={Common.relSearch}>
                             <ul 
-                                className="relKeywords" 
+                                className={Common.relKeywords}
                                 ref={ulElementRef} 
-                                style={{listStyle: 'none', marginRight: '30px'}} 
                                 onClick={onClickAppendChild}
                             >
                             </ul>
@@ -324,10 +318,9 @@ const UserMain = () => {
                             Search
                         </button>
                     </li>
-                    <li style={{marginLeft: '20px'}}>
+                    <li className={Common.filterWrap}>
                         <select 
-                            name="selectTypeFilter" 
-                            style={{width: '150px', height: '30px'}}
+                            className={Common.selectTypeGenFilter}
                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                                 onChangeTypeName(e.currentTarget.value)
                             }}
@@ -346,10 +339,9 @@ const UserMain = () => {
                             })}
                         </select>
                     </li>
-                    <li style={{marginLeft: '20px'}}>
+                    <li className={Common.filterWrap}>
                         <select 
-                            name="selectGenerationFilter" 
-                            style={{width: '150px', height: '30px'}}
+                            className={Common.selectTypeGenFilter}
                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                                 onChangeGenrationName(e.currentTarget.value)
                             }}
@@ -372,15 +364,12 @@ const UserMain = () => {
                 </ul>
             </div>       
             <div className='tableWrap'>
-                <table 
-                    className='listTable'
-                    style={{width: '100%', borderSpacing: '15px'}}
-                >
+                <table className={Common.listTable}>
                     <colgroup>
-                        <col></col>
-                        <col></col>
-                        <col></col>
-                        <col></col>
+                        <col width='5%' />
+                        <col width='35%' />
+                        <col width='25%' />
+                        <col width='35%' />
                     </colgroup>
                     <thead>
                         <tr>
@@ -408,7 +397,7 @@ const UserMain = () => {
                                 <>
                                     <tr 
                                         key={`pokemon_${(index+1)}`}
-                                        style={{textAlign: "center", cursor: "pointer"}}
+                                        className={Common.listTr}
                                         onClick={() => {onClickPokemonDetail(value)}}
                                     >
                                         <td>{value.id ?? '-'}</td>
@@ -420,7 +409,7 @@ const UserMain = () => {
                             )
                         }) : 
                         <>
-                            <tr style={{textAlign: "center"}}>
+                            <tr className={Common.listTrNone}>
                                 <td>-</td>
                                 <td>-</td>
                                 <td>-</td>

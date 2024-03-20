@@ -18,6 +18,7 @@
     "paths": {
       "pages/*": ["pages/*"],
       "service/*": ["service/*"],
+      "styles/*": ["styles/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
