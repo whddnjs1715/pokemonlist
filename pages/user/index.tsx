@@ -393,7 +393,7 @@ const UserMain = () => {
                             if(searchList === '') return searchList.indexOf('') >= 0
                             else return searchList.indexOf(e.name) >= 0
                         })).map((value, index) => {
-                            if((storedSearchData.page*10) < value.id) return <></>
+                            if((storedSearchData.page*20) < value.id) return <></>
                             return (
                                 <>
                                     <tr 
