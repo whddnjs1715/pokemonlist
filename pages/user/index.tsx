@@ -167,7 +167,6 @@ const UserMain = () => {
             elementLi.style.cursor= 'pointer'
             elementLi.className = 'relKeywordsLi'
             elementLi.innerHTML = value.name;
-            console.log('ulElementCurrent', ulElementCurrent)
             if(ulElementCurrent) ulElementCurrent.appendChild(elementLi)
         })
     }
