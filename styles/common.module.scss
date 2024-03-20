@@ -9,8 +9,23 @@
 }
 
 .relKeywords{
-    list-style: none;
-    margin-right: 30px;
+    position: absolute;
+    z-index: 2;
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 10%; 
+}
+
+.relKeywords li {
+    padding: 8px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #f5f5f5;
+    }
 }
 
 .filterWrap{
@@ -22,16 +37,43 @@
     height: 30px;
 }
 
+.tableWrap {
+    position: relative; 
+    z-index: 1;
+}
+
 .listTable {
     width: 100%;
     border-spacing: 15px;
+    border-collapse: collapse;
 }
 
 .listTr{
     text-align: center;
     cursor: pointer;
+
+    &:hover {
+        background-color: #f5f5f5;
+    }
 }
 
 .listTrNone{
     text-align: center;
 }
+
+.tablePartTh {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+    background-color: #f2f2f2;
+}
+
+.tablePartTd {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+  
+
+  

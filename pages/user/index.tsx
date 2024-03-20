@@ -167,6 +167,7 @@ const UserMain = () => {
             elementLi.style.cursor= 'pointer'
             elementLi.className = 'relKeywordsLi'
             elementLi.innerHTML = value.name;
+            console.log('ulElementCurrent', ulElementCurrent)
             if(ulElementCurrent) ulElementCurrent.appendChild(elementLi)
         })
     }
@@ -363,7 +364,7 @@ const UserMain = () => {
                     </li>                    
                 </ul>
             </div>       
-            <div className='tableWrap'>
+            <div className={Common.tableWrap}>
                 <table className={Common.listTable}>
                     <colgroup>
                         <col width='5%' />
@@ -373,10 +374,10 @@ const UserMain = () => {
                     </colgroup>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Generations</th>
-                            <th>Type</th>
+                            <th className={Common.tablePartTh}>ID</th>
+                            <th className={Common.tablePartTh}>Name</th>
+                            <th className={Common.tablePartTh}>Generations</th>
+                            <th className={Common.tablePartTh}>Type</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -400,10 +401,10 @@ const UserMain = () => {
                                         className={Common.listTr}
                                         onClick={() => {onClickPokemonDetail(value)}}
                                     >
-                                        <td>{value.id ?? '-'}</td>
-                                        <td>{value.name ?? '-'}</td>
-                                        <td>{value.gen ?? '-'}</td>
-                                        <td>{value.type ?? '-'}</td>
+                                        <td className={Common.tablePartTd}>{value.id ?? '-'}</td>
+                                        <td className={Common.tablePartTd}>{value.name ?? '-'}</td>
+                                        <td className={Common.tablePartTd}>{value.gen ?? '-'}</td>
+                                        <td className={Common.tablePartTd}>{value.type ?? '-'}</td>
                                     </tr>
                                 </>
                             )
