@@ -1,6 +1,7 @@
 import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react";
 import API from "service/api";
+import Common from 'styles/common.module.scss'
 import { 
     PokemonDetailInfoModel, 
     PokemonInfoStatsModel, 
@@ -125,58 +126,44 @@ const PokemonDetail = () => {
     return (
         <>
             <div className="container">
-                <div 
-                    className="contentWrap"
-                    style={{display: 'flex'}}
-                >
-                    <div 
-                        className="contentImg"
-                        style={{width: '50%'}}
-                    >
+                <div className={Common.contentWrap}>
+                    <div className={Common.contentImgContainer}>
                         <img 
                             src={pokemonDetail.img ?? ''}
-                            style={{width: '100%'}}
+                            className={Common.contentImg}
                         />
                     </div>
                     <div className="contentInfo">
-                        <h3 style={{fontSize: '45px', margin: '0'}}>
-                            <p 
-                                style={{margin: '0', fontSize: '22px', color: '#999'}}
-                            >
+                        <h3 className={Common.contentInfoNoContainer}>
+                            <p className={Common.contentInfoNo}>
                                 No. {id ?? ''}
                             </p>
                             {pokemonDetail.name}
                         </h3>
-                        <div
-                            className="contentInfoType" 
-                            style={{marginTop: '20px', marginBottom: '20px'}}
-                        >
+                        <div className={Common.contentInfoTypeContainer}>
                             {pokemonDetail.types.map((value: PokemonInfoTypesModel, index: number) => {
                                 let upperCase = value.type.name?.toLocaleUpperCase()
                                 return (
                                     <span 
                                         key={`pokemon_type_${index}`}
-                                        style={{background: '#9E2A22', padding: '10px', marginRight: '5px', color: '#fff', fontWeight: '500'}}
+                                        className={Common.contentInfoType}
                                     >
                                         {upperCase}
                                     </span>
                                 )
                             })}
                         </div>
-                        <div 
-                            className="contentInfoStat"
-                            style={{border : '1px solid #999', borderRadius: '5px', padding: '10px'}}
-                        >
+                        <div className={Common.contentInfoStatWrap}>
                             {pokemonDetail.stats.map((value:PokemonInfoStatsModel, index:number) => {
                                 return (
                                     <p key={`pokemon_stat_${index}`}>
-                                        <span style={{fontSize: '25px', fontWeight: '1000'}}>{value.stat.name ?? ''} : </span>
-                                        <span style={{fontSize: '20px', fontWeight: '500'}}>{value.base_stat ?? ''}</span>
+                                        <span className={Common.contentInfoStat} style={{fontSize: '25px', fontWeight: '1000'}}>{value.stat.name ?? ''} : </span>
+                                        <span className={Common.contentInfoStat} style={{fontSize: '20px', fontWeight: '500'}}>{value.base_stat ?? ''}</span>
                                     </p>
                                 )
                             })}
                         </div>
-                        <div style={{display: 'flex', marginTop: '20px'}}>
+                        <div className={Common.contentInfoEvolutionContainer}>
                             {pokemonEvolutionList.filter((value, index, self) => 
                                 index === self.findIndex((e) => e.name === value.name)
                                 ).map((value, index) => {
@@ -186,7 +173,7 @@ const PokemonDetail = () => {
                                             style={value.current ? {border: '1px solid rgba(255, 0, 0, 1)'} : {}}
                                         >
                                             <img src={value.img ?? ''}/>
-                                            <p style={{textAlign: "center"}}>{value.name}</p>
+                                            <p className={Common.contentInfoEvolutionName}>{value.name}</p>
                                         </div>
                                     )
                                 })
@@ -194,9 +181,6 @@ const PokemonDetail = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-            <div>
-                
             </div>
         </>
     )

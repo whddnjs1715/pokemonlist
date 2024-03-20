@@ -74,6 +74,68 @@
     padding: 8px;
 }
 
-  
 
-  
+///////
+
+.contentWrap {
+    display: flex;
+}
+
+.contentImgContainer{
+    width: 50%;   
+}
+
+.contentImg {
+    width: 100%;
+}
+
+.contentInfoNoContainer {
+    font-size: 45px;
+    margin: 0;
+}
+
+.contentInfoNo {
+    margin: 0;
+    font-size: 22px;
+    color: #999;
+}
+
+.contentInfoTypeContainer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.contentInfoType {
+    background: #9E2A22;
+    padding: 10px;
+    margin-right: 5px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.contentInfoStatWrap {
+    border: 1px solid #999;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.contentInfoStat {
+    &:nth-child(even) {
+        font-size: 25px;
+        font-weight: 1000;
+    }
+    
+    &:nth-child(odd) {
+        font-size: 20px;
+        font-weight: 500;
+    }
+}
+ 
+.contentInfoEvolutionContainer {
+    display: flex;
+    margin-top: 20px;
+}
+
+.contentInfoEvolutionName {
+    text-align: center;
+}
